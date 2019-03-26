@@ -91,15 +91,16 @@ async def search(ctx, *, args:str = None):
                     pass
 
 
-            ## Everything should be popped and only keywords left over
-        print ("-------------------------------------")
-        print(arg)
-        print ("-------------------------------------")
-        print ("Sort: " + sortType)
-        print ("FilterLocation: " + filterLocation)
-        print ("FilterPrice: " + filterPrice)
-        print ("FilterFree: " + str(filterFree))
-        print ("Keywords: " + str(arg))
+        ## Log the search
+        logging = "-------------------------------------\n"
+        logging += str(arg) + '\n'
+        logging += "-------------------------------------\n"
+        logging += "Sort: " + sortType + '\n'
+        logging += "FilterLocation: " + filterLocation + '\n'
+        logging += "FilterPrice: " + filterPrice + '\n'
+        logging += "FilterFree: " + str(filterFree) + '\n'
+        logging += "Keywords: " + str(arg) + '\n'
+        Log(logging)
 
         header='**CraigsList Search**\nKeywords: {0}\nFilters: {1}\nSort: {2}'.format(str(arg), sortType, "NoFree")
         msg = cl_search(str(arg).replace(" ", "+"), sort=sortType, filterFree=True, filterLocationData=filterLocation, filterPriceData=filterPrice)
