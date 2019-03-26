@@ -103,7 +103,21 @@ async def search(ctx, *, args:str = None):
         Log(logging)
 
         header='**CraigsList Search**\nKeywords: {0}\nFilters: {1}\nSort: {2}'.format(str(arg), sortType, "NoFree")
-        msg = cl_search(str(arg).replace(" ", "+"), sort=sortType, filterFree=True, filterLocationData=filterLocation, filterPriceData=filterPrice)
+        msg = cl_search(str(arg).replace(" ", "+"), sort=sortType, filterFree=filterFree, filterLocationData=filterLocation, filterPriceData=filterPrice)
+        # msg is a pandas dataframe, format the data to display nicely
+        '''
+        response = "Dates\t|Locations\t|Titles\t|Prices\n"
+
+        for x in 10:
+            date = msg['Dates'][1]
+            price = msg['Pricings'][1]
+            location = msg['Locations'][1]
+            title = msg['Titles'][1]
+        response += date + '\t|' + location + '\t|'  + title + '\t|'  + price + '\n'
+        '''
+
+
+
         await ctx.send(botMsg(msg[:10]))
     else:
         help = "====================\nCraigsList Search Help\n====================\n"
