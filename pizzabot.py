@@ -14,7 +14,7 @@ def Log(msg):
     print(str(date.today()) + ": " + msg)
 
 def botMsg(msg):
-    return ("```" + str(msg) + "```")
+    return ("```css\n" + str(msg) + "```")
 
 @bot.event
 async def on_ready():
@@ -39,22 +39,87 @@ async def echo(ctx, *, content:str):
     await ctx.send(botMsg(content))
 
 @bot.command(name="search", pass_context=True)
-async def search(ctx, *, args:str):
+async def search(ctx, *, args:str = None):
     '''
-    Search CraigsList and Format Results
+    Search CraigsList
     '''
+    if args:
+        # PARSE ARGUMENTS
+        #arguments = "synth dx7 -f -s Alpha -l VANCOUVER -p 200-300"
+        arg = args.split(" ")
+        sortType = "LowPrice"
+        filterLocation = ""
+        filterPrice = ""
+        filterFree = False
+        while (("-s" in arg) or ("-l" in arg) or ("-f" in arg) or ("-p" in arg)):
+            for x in range(len(arg)):
+                checked = False
+                ## SORT
+                try:
+                    if (('-s' in arg[x]) and (not checked)):
+                        sortType = arg.pop(x+1)
+                        arg.pop(x)
+                        checked = True
+                except:
+                    pass
 
-    arguments = "-s Alpha -l VANCOUVER -p 200-300 -k synth dx7"
+                ## FILTER LOCATION
+                try:
+                    if (('-l' in arg[x]) and (not checked)):
+                        filterLocation = arg.pop(x+1)
+                        arg.pop(x)
+                        checked = True
+                except:
+                    pass
 
-    arg = arguments.split(" ")
+                ## FILTER PRICE
+                try:
+                    if (('-p' in arg[x]) and (not checked)):
+                        filterPrice = arg.pop(x+1)
+                        arg.pop(x)
+                        checked = True
+                except:
+                    pass
 
-    for x in range(len(arguments))
+                ## FILTER FREE
+                try:
+                    if (('-f' in arg[x]) and (not checked)):
+                        filterFree = True
+                        arg.pop(x)
+                        checked = True
+                except:
+                    pass
 
-    #Decipher args for options
-    args = "DX7"
 
-    header='**CraigsList Search**\nKeywords: {0}\nFilters: {1}\nSort: {2}'.format(args, "LowPrice", "NoFree")
-    msg = cl_search(args.replace(" ", "+"), sort="LowPrice", filterFree=True)
-    await ctx.send(botMsg(msg[:10]))
+            ## Everything should be popped and only keywords left over
+        print ("-------------------------------------")
+        print(arg)
+        print ("-------------------------------------")
+        print ("Sort: " + sortType)
+        print ("FilterLocation: " + filterLocation)
+        print ("FilterPrice: " + filterPrice)
+        print ("FilterFree: " + str(filterFree))
+        print ("Keywords: " + str(arg))
+
+        header='**CraigsList Search**\nKeywords: {0}\nFilters: {1}\nSort: {2}'.format(str(arg), sortType, "NoFree")
+        msg = cl_search(str(arg).replace(" ", "+"), sort=sortType, filterFree=True, filterLocationData=filterLocation, filterPriceData=filterPrice)
+        await ctx.send(botMsg(msg[:10]))
+    else:
+        help = "====================\nCraigsList Search Help\n====================\n"
+        help += "  SORT TYPE\n"
+        help += "    -s LowPrice | Newest | Alpha\n"
+        help += "  LOCATION FILTER\n"
+        help += "    -l vancouver | langley | kitsilano\n"
+        help += "  PRICE FILTER\n"
+        help += "    -p min-max | 0-200 | 100-800\n"
+        help += "  FILTER OUT FREE LISTINGS\n"
+        help += "    -f\n"
+        help += "===================="
+        await ctx.send(botMsg(help))
+
+@bot.event
+async def on_command_error(error, ctx):
+    # you can compare error here
+    print("Error: " + str(error))
 
 bot.run(token)

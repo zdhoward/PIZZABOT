@@ -1,14 +1,10 @@
+# PARSE ARGUMENTS
 arguments = "synth dx7 -f -s Alpha -l VANCOUVER -p 200-300"
-
 arg = arguments.split(" ")
-
-print(arg)
-
 sortType = "LowPrice"
 filterLocation = ""
 filterPrice = ""
 filterFree = False
-
 while (("-s" in arg) or ("-l" in arg) or ("-f" in arg) or ("-p" in arg)):
     for x in range(len(arg)):
         #print ("X: " + str(x))
