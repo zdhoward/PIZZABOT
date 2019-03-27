@@ -1,6 +1,7 @@
 from discord.ext import commands
 import asyncio
 from datetime import date
+from datetime import datetime
 
 from credentials import secret_key, client_id, token
 from cl_scraper import cl_search
@@ -15,6 +16,7 @@ def Log(msg):
 
 def botMsg(msg):
     return ("```css\n" + str(msg) + "```")
+    #return ("" + str(msg) + "")
 
 @bot.event
 async def on_ready():
@@ -90,12 +92,19 @@ async def search(ctx, *, args:str = None):
                 except:
                     pass
 
+        filterTypes=""
+        if filterLocation:
+            filterTypes += "Locations "
+
+        if filterPrice:
+            filterTypes += "Prices"
 
         ## Log the search
         logging = "-------------------------------------\n"
         logging += str(arg) + '\n'
         logging += "-------------------------------------\n"
         logging += "Sort: " + sortType + '\n'
+        logging += "FilterTypes: " + filterTypes + '\n'
         logging += "FilterLocation: " + filterLocation + '\n'
         logging += "FilterPrice: " + filterPrice + '\n'
         logging += "FilterFree: " + str(filterFree) + '\n'
@@ -103,22 +112,24 @@ async def search(ctx, *, args:str = None):
         Log(logging)
 
         header='**CraigsList Search**\nKeywords: {0}\nFilters: {1}\nSort: {2}'.format(str(arg), sortType, "NoFree")
-        msg = cl_search(str(arg).replace(" ", "+"), sort=sortType, filterFree=filterFree, filterLocationData=filterLocation, filterPriceData=filterPrice)
+        msg = cl_search(str(arg).replace(" ", "+"), sort=sortType, filterTypes=filterTypes, filterFree=filterFree, filterLocationData=filterLocation, filterPriceData=filterPrice)
         # msg is a pandas dataframe, format the data to display nicely
-        '''
-        response = "Dates\t|Locations\t|Titles\t|Prices\n"
-
-        for x in 10:
-            date = msg['Dates'][1]
-            price = msg['Pricings'][1]
-            location = msg['Locations'][1]
-            title = msg['Titles'][1]
-        response += date + '\t|' + location + '\t|'  + title + '\t|'  + price + '\n'
-        '''
 
 
+        response = ""
 
-        await ctx.send(botMsg(msg[:10]))
+        for x in range(len(msg)):
+            date        = msg['Dates'][x]
+            price       = msg['Prices'][x]
+            location    = msg['Locations'][x]
+            title       = msg['Titles'][x]
+            link        = msg['Links'][x]
+            response += str(datetime.strptime("{:<6}".format(str(date).split(" ")[0]), '%Y-%m-%d').strftime('%b %d')) + ', ' + "{:<14}".format(str(location))[0:14] + ', ' + "{:<30}".format(str(title))[0:30] + ', '  + "{:<4}".format(str(price))[0:4] +  '\n' + str(link) + '\n---\n'
+
+
+
+
+        await ctx.send(botMsg(str(response)))
     else:
         help = "====================\nCraigsList Search Help\n====================\n"
         help += "  SORT TYPE\n"
@@ -132,9 +143,11 @@ async def search(ctx, *, args:str = None):
         help += "===================="
         await ctx.send(botMsg(help))
 
+'''
 @bot.event
 async def on_command_error(error, ctx):
     # you can compare error here
     print("Error: " + str(error))
+'''
 
 bot.run(token)

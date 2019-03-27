@@ -29,6 +29,8 @@ def cl_search(keywords, filterTypes=None, filterLocationData=None, filterPriceDa
     dates = []
     prices = []
     descriptions = []
+    links = []
+    images = []
     urls = []
     urls.append(url_base + searchTerms)
 
@@ -64,30 +66,34 @@ def cl_search(keywords, filterTypes=None, filterLocationData=None, filterPriceDa
             except:
                 locations.append('zzz_missing')
 
+            try:
+                link = listing.find('a', {'class': ["result-image gallery"]})
+                links.append(link['href'])
+            except:
+                links.append('zzz_missing')
+
     #write findings to a dataframa
-    listings_df = pd.DataFrame({"Dates": dates, "Locations": locations, "Titles": titles, "Prices": prices})
+    listings_df = pd.DataFrame({"Dates": dates, "Locations": locations, "Titles": titles, "Prices": prices, "Links": links})
 
     #filter results if necessary
     if filterFree:
         listings_df = listings_df[listings_df['Prices'] != 0]
 
-    if filterTypes:
-        if "Locations" in filterTypes:
-            if filterLocationData:
-                filter = listings_df["Locations"]==filterLocationData.upper()
-                listings_df = listings_df[filter]
 
-        if "Prices" in filterTypes:
-            if filterPriceData:
-                min = int(filterPriceData.split("-")[0])
-                max = int(filterPriceData.split("-")[1])
-                listings_df = listings_df[(listings_df["Prices"] >= min) & (listings_df["Prices"] <= max)]
+    if filterLocationData:
+        filter = listings_df["Locations"]==filterLocationData.upper()
+        listings_df = listings_df[filter]
+
+
+    if filterPriceData:
+        min = int(filterPriceData.split("-")[0])
+        max = int(filterPriceData.split("-")[1])
+        listings_df = listings_df[(listings_df["Prices"] >= min) & (listings_df["Prices"] <= max)]
 
 
     #sort listings
     sortFilter = sortFilters[sort]
     listings_df.sort_values(by=[sortFilter['data']], inplace=True, ascending=sortFilter['asc'])
-    #listings_df.sort(sortFilter)
 
     ### DEBUG
     if DEBUG:
@@ -152,4 +158,4 @@ if __name__ == '__main__':
     filterFree = args.filterFree
 
     #print(allKeys)
-    cl_search(allKeys,filterTypes=filterTypes, filterLocationData=filterLocationData, filterPriceData=filterPriceData, sort=sort, filterFree=filterFree, DEBUG=debug)
+    ret = cl_search(allKeys,filterTypes=filterTypes, filterLocationData=filterLocationData, filterPriceData=filterPriceData, sort=sort, filterFree=filterFree, DEBUG=debug)
